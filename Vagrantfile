@@ -3,7 +3,7 @@
 
 Vagrant.configure(2) do |config|
   # Base box
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "kaorimatz/ubuntu-16.04-amd64"
   config.vm.box_check_update = false
 
   # Network configuration
@@ -13,15 +13,21 @@ Vagrant.configure(2) do |config|
   config.vm.provider "virtualbox" do |vb|
     vb.name = "vagrant_dev"
     vb.cpus = 2
-    vb.memory = "2048"
+    vb.memory = "4096"
     vb.gui = true
   end
 
   # System provisioning
   config.vm.provision "shell", inline: <<-EOF
-    # Add software sources (SBT)
-    sudo add-apt-repository "deb https://dl.bintray.com/sbt/debian /"
+    # Add software sources
+    apt-get -y update
+    apt-get -y install apt-transport-https ca-certificates
+    # * SBT
+    echo "deb https://dl.bintray.com/sbt/debian /" >/etc/apt/sources.list.d/sbt.list
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
+    # * Docker
+    echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" >/etc/apt/sources.list.d/docker.list
+    apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 
     # Preconfiguration for MySQL
     debconf-set-selections <<< 'mysql-server mysql-server/root_password password vagrant'
@@ -29,7 +35,21 @@ Vagrant.configure(2) do |config|
 
     # Install software
     apt-get -y update
-    apt-get -y install git mercurial mysql-server scala sbt ruby guake xfce4
+    apt-get -y autoremove
+    apt-get -y install docker-engine \
+                       git \
+                       linux-image-extra-$(uname -r) \
+                       linux-image-extra-virtual \
+                       mercurial \
+                       mysql-server \
+                       scala \
+                       sbt \
+                       ruby \
+                       guake \
+                       xfce4
+    
+    # Post-config
+    usermod -aG docker vagrant
   EOF
 
   # User provisioning
