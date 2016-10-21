@@ -8,6 +8,7 @@ Vagrant.configure(2) do |config|
 
   # Network configuration
   config.vm.network :forwarded_port, guest: 3000, host: 3000 # RoR
+  config.vm.network :forwarded_port, guest: 8080, host: 8080 # Web
 
   # Provider-specific configuration
   config.vm.provider "virtualbox" do |vb|
@@ -38,6 +39,8 @@ Vagrant.configure(2) do |config|
     apt-get -y autoremove
     apt-get -y install docker-engine \
                        git \
+                       httpie \
+                       libmysqlclient-dev \
                        linux-image-extra-$(uname -r) \
                        linux-image-extra-virtual \
                        mercurial \
@@ -46,6 +49,7 @@ Vagrant.configure(2) do |config|
                        sbt \
                        ruby \
                        guake \
+                       vim \
                        xfce4
     
     # Post-config
@@ -62,5 +66,11 @@ Vagrant.configure(2) do |config|
     # Install RVM
     gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
     curl -sSL https://get.rvm.io | bash -s stable --ruby
+
+    # Install VIM Scala plugin
+    mkdir -p ~/.vim/{ftdetect,indent,syntax} && for d in ftdetect indent syntax ; do wget -O ~/.vim/$d/scala.vim https://raw.githubusercontent.com/derekwyatt/vim-scala/master/$d/scala.vim; done
+
+    # Git setup
+    git config --global credential.helper "cache --timeout=86400"
   EOF
 end
