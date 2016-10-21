@@ -40,6 +40,7 @@ Vagrant.configure(2) do |config|
     apt-get -y install docker-engine \
                        git \
                        httpie \
+                       imagemagick \
                        libmysqlclient-dev \
                        linux-image-extra-$(uname -r) \
                        linux-image-extra-virtual \
